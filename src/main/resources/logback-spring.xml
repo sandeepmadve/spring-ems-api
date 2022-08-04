@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true" scan="true"
+	scanPeriod="30 seconds">
+
+	<!-- Reusable property values -->
+	<property name="LOG_PATH" value="E:/temp/logs" />
+	<property name="LOG_ARCHIVE" value="E:/temp/logs/archive" />
+	<property name="LOG_AUDIT" value="E:/temp/logs/audit" />
+	<timestamp key="timestamp-by-second"
+		datePattern="yyyyMMdd'T'HHmmss" />
+	<!--<define name="HOSTNAME" class="ch.qos.logback.core.property.CanonicalHostNamePropertyDefiner"/> -->
+
+	<!-- appenders -->
+	<appender name="Console-Appender"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<layout>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
+		</layout>
+	</appender>
+
+	<appender name="File-Appender"
+		class="ch.qos.logback.core.FileAppender">
+		<file>${LOG_PATH}/emsapi-${timestamp-by-second}.log</file>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} [${HOSTNAME}] [%thread] %-5level
+				%logger{36} - %msg%n</pattern>
+			<outputPatternAsHeader>true</outputPatternAsHeader>
+		</encoder>
+	</appender>
+
+	<appender name="RollingFile-Appender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_ARCHIVE}/emsapi-rollingfile.log</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_ARCHIVE}/emsapi-rollingfile.log%d{yyyy-MM-dd
+				HH:mm:ss}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+			<totalSizeCap>1KB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} [${HOSTNAME}] [%thread] %-5level
+				%logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="Audit-Appender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_AUDIT}/audit.log</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_AUDIT}/audit-%d{yyyy-MM-dd_HH_mm_ss_SSS}.%i.log.gz
+			</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>50MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<!-- No Limit -->
+			<maxHistory>0</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} [${HOSTNAME}] [%thread] %-5level
+				%logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+
+	<appender name="Async-Appender"
+		class="ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref="RollingFile-Appender" />
+	</appender>
+
+
+	<!-- loggers -->
+	<logger name="com.bk.learning.ems" level="DEBUG"
+		additivity="false">
+		<appender-ref ref="Console-Appender" />
+		<appender-ref ref="File-Appender" />
+		<appender-ref ref="Async-Appender" />
+	</logger>
+
+	<logger name="com.bk.learning.ems-audit" level="TRACE"
+		additivity="false">
+		<appender-ref ref="Audit-Appender" />
+	</logger>
+
+	<!-- root logger (ancestor of all loggers)(default level is info) -->
+	<root>
+		<appender-ref ref="Console-Appender" />
+	</root>
+
+</configuration>
